@@ -28,7 +28,11 @@ public class Lexico {
   }
 
   private boolean isEspaco(char c) {
-    return (c == ' ' || c == '\n' || c == '\t');
+    return (c == ' ' || c == '\n' || c == '\t'|| c== '\r');
+  }
+
+  private boolean isExpression(char c){
+    return (c==':'|| c=='=');
   }
 
   private boolean isEOF() {
@@ -69,6 +73,9 @@ public class Lexico {
           } else if (isLetra(c)) {
             estado = 3;
             tipo += c;
+          }else if(isExpression(c)){
+            estado=4;
+            tipo+=c;
           } else {
             if (c == 0) {
               return null;
@@ -107,6 +114,15 @@ public class Lexico {
             return new Token(Token.INDENTIFICADOR, tipo);
           }
           break;
+        case 4:
+          if(isExpression(c)){
+            estado=4;
+            tipo+=c;
+          }else{
+            Retorno();
+            return new Token(Token.SIMBOLO, tipo);
+          }
+          
       }
     }
   }
