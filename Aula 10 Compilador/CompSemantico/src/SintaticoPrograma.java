@@ -25,13 +25,14 @@ public class SintaticoPrograma {
 
     private void Prog(){
         System.out.println("prog");
+        while(!verificaSimbolo(".")){
             if(!verificaSimbolo("program")){
                 throw new RuntimeException("Erro sintático Programa não declarado: " + simbolo.getValor());
             }
             else{
                 Corpo();
             }
-            
+        }
     }
 
     private void Corpo() {
@@ -133,8 +134,6 @@ public class SintaticoPrograma {
         }obtemSimbolo();
         if(verificaSimbolo(".")){
             System.out.println("fim programa");
-        }else{
-            throw new RuntimeException("Erro sintático esperado . antes" + simbolo.getValor());
         }
     }
     
@@ -159,6 +158,7 @@ public class SintaticoPrograma {
     }
 
     private void expressao() {
+        
         System.out.println("expressão");
         System.out.println("simbolo dentro de expressão >> "+simbolo.getValor());
         termo();
@@ -295,12 +295,6 @@ public class SintaticoPrograma {
             Comandos();
         }
     }
-
-
-
-
-
-
 
 
     public void Analisador(){

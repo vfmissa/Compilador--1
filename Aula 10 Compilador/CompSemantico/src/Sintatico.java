@@ -14,6 +14,7 @@ public class Sintatico {
 
   private void obtemSimbolo() {
     simbolo = lexico.proxToken();
+  
   }
 
   private boolean verificaSimbolo(String termo) {
