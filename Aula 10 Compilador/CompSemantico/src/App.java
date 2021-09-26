@@ -3,7 +3,7 @@ public class App {
         System.out.println("primeiro compilador");
 
 
-        Sintatico S = new Sintatico("input.txt");
+        SintaticoPrograma S = new SintaticoPrograma("input.txt");
         S.Analisador();
     }
 }
