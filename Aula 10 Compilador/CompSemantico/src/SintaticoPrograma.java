@@ -26,7 +26,7 @@ public class SintaticoPrograma {
     private void Prog(){
         System.out.println("prog");
         System.out.println("simbolo antes de prog>>"+simbolo.getValor());
-        if(!verificaSimbolo(".")){
+        
             if(!verificaSimbolo("program")){
                 throw new RuntimeException("Erro sintático Programa não declarado: " + simbolo.getValor());
             }
@@ -38,11 +38,13 @@ public class SintaticoPrograma {
                 }
                 else{
                     Corpo();
+                    if(verificaSimbolo(".")){
+                        obtemSimbolo();
+                    }
                 }
                 
             }
-        }
-        obtemSimbolo();
+        
     }
 
     private void Corpo() {
@@ -90,6 +92,9 @@ public class SintaticoPrograma {
         if(verificaSimbolo(";")){
             obtemSimbolo();
             DC();
+        }
+        else{
+            throw new RuntimeException("Erro faltou ; depois de : " + simbolo.getValor());
         }
     }
 
@@ -174,7 +179,7 @@ public class SintaticoPrograma {
         }
         if (tabelaSimbolo.containsKey(simbolo.getValor())) {
             obtemSimbolo();
-            if (simbolo.getTipo() != Token.SIMBOLO){
+            if(!verificaSimbolo(":=")){
                 throw new RuntimeException("Erro sintático esperado := encontrado: " + simbolo.getValor());
             }else{
                 obtemSimbolo();
@@ -184,12 +189,17 @@ public class SintaticoPrograma {
         if(verificaSimbolo("if")){
             obtemSimbolo();
             condicao();
-            if(verificaSimbolo("then")){
-                obtemSimbolo();
-                Comandos();
-                pfalsa();
-            }
+            
         }
+        if(verificaSimbolo("then")){
+            obtemSimbolo();
+            System.out.println("comando do if >> "+simbolo.getValor());
+            Comandos();
+            pfalsa();
+                       
+        }
+            
+        
         if(verificaSimbolo("$")){
             obtemSimbolo();
         }
@@ -203,6 +213,7 @@ public class SintaticoPrograma {
             obtemSimbolo();
             Comandos();
         }
+    
     }
 
 
@@ -213,8 +224,7 @@ public class SintaticoPrograma {
 
 
     }
-
-    
+  
 
 
 
@@ -249,6 +259,7 @@ public class SintaticoPrograma {
 
     private void fator(){
         System.out.println("fator "+simbolo.getValor());
+        
         if(simbolo.getTipo()==Token.INDENTIFICADOR){
             if (tabelaSimbolo.containsKey(simbolo.getValor())){
                 obtemSimbolo();
@@ -263,9 +274,13 @@ public class SintaticoPrograma {
         if(verificaSimbolo("(")){
             obtemSimbolo();
             expressao();
-        }
-        if(verificaSimbolo(")")){
-            obtemSimbolo();            
+            
+            if(verificaSimbolo(")")){
+                obtemSimbolo();
+                
+            }else{
+                throw new RuntimeException("Erro faltou )" + simbolo.getValor());
+            }
         }
         else{
             System.out.println("saida fator "+simbolo.getValor());
@@ -275,18 +290,22 @@ public class SintaticoPrograma {
 
 
     private void mais_fatores(){
-        System.out.println("mais fatores: "+simbolo.getValor());
-        op_mul();
-        fator();
-        //mais_fatores(); não consegui executar com essa recursão ficava um loop infinito
-
+        if(verificaSimbolo("*") || verificaSimbolo("/")){
+            System.out.println("mais fatores: "+simbolo.getValor());
+            op_mul();
+            fator();
+            mais_fatores();
+        }
     }
 
     private void Outros_termos() {
-        System.out.println("outros termos "+simbolo.getValor());
-        op_ad();
-        Termo();
-        //Outros_termos(); não entendi porque a recursão ficava infinita 
+        if(verificaSimbolo("+") || verificaSimbolo("-")){
+            System.out.println("outros termos "+simbolo.getValor());
+            op_ad();
+            Termo();
+            Outros_termos();
+        }
+        
     }
 
 
@@ -315,6 +334,7 @@ public class SintaticoPrograma {
         System.out.println("pfalsa: "+simbolo.getValor());
         if(verificaSimbolo("else")){
             obtemSimbolo();
+            System.out.println("simbolo dentro do else: "+simbolo.getValor());
             Comandos();
         }
  

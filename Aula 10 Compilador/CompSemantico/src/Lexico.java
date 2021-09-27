@@ -32,7 +32,7 @@ public class Lexico {
   }
 
   private boolean isExpression(char c){
-    return (   c==':'|| c=='='  ||  c=='>'|| c=='<'|| c=='*'|| c=='/' );
+    return (   c==':'|| c=='='  ||  c=='>'|| c=='<'|| c=='*'|| c=='/' || c=='+'|| c=='-');
   }
 
   private boolean isEOF() {
@@ -120,7 +120,7 @@ public class Lexico {
             tipo+=c;
           }else{
             Retorno();
-            return new Token(Token.SIMBOLO, tipo);
+            return new Token(Token.OPERADOR, tipo);
           }
           
       }

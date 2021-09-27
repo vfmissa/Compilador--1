@@ -9,6 +9,7 @@ public class Token {
     public static final int INTEIRO=2;
     public static final int REAL=3;
     public static final int SIMBOLO=4;
+    public static final int OPERADOR=5;
     
 
     private String valor;
