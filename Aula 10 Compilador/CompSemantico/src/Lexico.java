@@ -32,7 +32,7 @@ public class Lexico {
   }
 
   private boolean isExpression(char c){
-    return (c==':'|| c=='=');
+    return (   c==':'|| c=='='  ||  c=='>'|| c=='<'|| c=='*'|| c=='/' );
   }
 
   private boolean isEOF() {

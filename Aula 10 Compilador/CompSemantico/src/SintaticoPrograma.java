@@ -25,25 +25,37 @@ public class SintaticoPrograma {
 
     private void Prog(){
         System.out.println("prog");
-        while(!verificaSimbolo(".")){
+        System.out.println("simbolo antes de prog>>"+simbolo.getValor());
+        if(!verificaSimbolo(".")){
             if(!verificaSimbolo("program")){
                 throw new RuntimeException("Erro sintático Programa não declarado: " + simbolo.getValor());
             }
             else{
-                Corpo();
+                obtemSimbolo();
+                System.out.println("simbolo antes de corpo>>"+simbolo.getValor());
+                if(simbolo.getTipo()!=Token.INDENTIFICADOR){
+                    throw new RuntimeException("Erro esperado indetificador antes de " + simbolo.getValor());
+                }
+                else{
+                    Corpo();
+                }
+                
             }
         }
+        obtemSimbolo();
     }
 
     private void Corpo() {
-        System.out.println("corpo");
+        System.out.println("simbolo corpo>>"+simbolo.getValor());
         obtemSimbolo();
-        if(simbolo.getTipo()!=Token.INDENTIFICADOR || (verificaSimbolo("begin"))){
-            throw new RuntimeException("nome programa não pode ser: " + simbolo.getValor());
-        }
-        else{
+        DC();
+        if((verificaSimbolo("begin"))){
             obtemSimbolo();
-            DC();
+            Comandos();
+        }
+        if(verificaSimbolo("end")){
+            obtemSimbolo();
+            
         }
 
 
@@ -51,252 +63,263 @@ public class SintaticoPrograma {
 
     
     private void DC() {
-        
-        while(!verificaSimbolo("begin")){
-            if (!verificaSimbolo("integer") && !verificaSimbolo("real")) {
-                throw new RuntimeException("Erro sintático esperado integer/real encontrado: " + simbolo.getValor());
-            }
-            if (simbolo.getValor().equals("integer")) {
-                this.tipo = Token.INTEIRO;
-                System.out.println("declarei int");
-            }else {
-                this.tipo = Token.REAL;
-                System.out.println("declarei real");
-            }
+        System.out.println("simbolo DC>>"+simbolo.getValor());
+        if(verificaSimbolo("begin")){
+
+        }
+        else{
+            DC_V();
+            MaisDC();
+        }
+    }
+    
+
+    private void DC_V() {
+        System.out.println("simbolo DCV>>"+simbolo.getValor());
+        Tipovari();
+        if(verificaSimbolo(":")){
             obtemSimbolo();
-            if(!verificaSimbolo(":")){
-                throw new RuntimeException("esperado : encontrado " + simbolo.getValor());
-
-            }else{
-                obtemSimbolo();
-                mais_DC();
-            }
+            Variaveis();
         }
-        obtemSimbolo();
-        Comandos();
+        
     }
 
 
-    private void mais_DC() {
-        System.out.println("+DC");
-        if (simbolo == null || simbolo.getTipo() != Token.INDENTIFICADOR) {
-          throw new RuntimeException("Erro sintático esperado identificador encontrado: " + simbolo.getValor());
-        }
-    
-        if (tabelaSimbolo.containsKey(simbolo.getValor())) {
-          throw new RuntimeException("Erro semântico identificador já encontrado: " + simbolo.getValor());
-        } else {
-          tabelaSimbolo.put(simbolo.getValor(), new Simbolo(this.tipo, simbolo.getValor()));
-        }
-    
-        obtemSimbolo();
-        Llinha();
-    }
-
-
-
-    private void Llinha() {
-        System.out.println("Llinha'");
-        if (verificaSimbolo(",")) {
-          obtemSimbolo();
-          mais_DC();
-        }if(verificaSimbolo(";")){
-            System.out.println("simbolo antes de dc>>"+simbolo.getValor());
+    private void MaisDC() {
+        System.out.println("simbolo +DC>>"+simbolo.getValor());
+        if(verificaSimbolo(";")){
             obtemSimbolo();
             DC();
         }
     }
 
 
-
-      
-
-    private void Comandos() {
-        System.out.println("simbolo dentro de comando >> "+simbolo.getValor());
-        while(!verificaSimbolo("end")){
+    private void Variaveis() {
+        System.out.println("simbolo variaveis>>"+simbolo.getValor());
+        if(simbolo.getTipo() != Token.INDENTIFICADOR ){
+            throw new RuntimeException("Erro sintático esperado indentificador antes de " + simbolo.getValor());
+        }else{
             if (tabelaSimbolo.containsKey(simbolo.getValor())) {
+                throw new RuntimeException("Erro semântico identificador já encontrado: " + simbolo.getValor());
+            } else {
+                tabelaSimbolo.put(simbolo.getValor(), new Simbolo(this.tipo, simbolo.getValor()));
                 obtemSimbolo();
-                if (simbolo.getTipo() != Token.SIMBOLO){
-                    throw new RuntimeException("Erro sintático esperado := encontrado: " + simbolo.getValor());
+                Maisvari();
+            }
+            
+        }
+    }
+
+    
+    private void Maisvari() {
+        System.out.println("simbolo maisvari>>"+simbolo.getValor());
+        if(verificaSimbolo(",")){
+            obtemSimbolo();
+            Variaveis();
+        }
+    }
+
+    private void Tipovari() {
+        System.out.println("simbolo tipovari>>"+simbolo.getValor());
+        if(!verificaSimbolo("real") && !verificaSimbolo("integer")){
+            throw new RuntimeException("Erro sintático esperado real /integer" + simbolo.getValor());
+        }
+        obtemSimbolo();
+    }
+
+    void Comandos(){
+        Comando();
+        Mais_Comandos();
+    }
+    
+
+    
+
+    private void Comando() {
+        System.out.println("simbolo dentro de comando >> "+simbolo.getValor());
+        if(verificaSimbolo("read")){
+            obtemSimbolo();
+            if(verificaSimbolo("(")){
+                obtemSimbolo();
+                if (!tabelaSimbolo.containsKey(simbolo.getValor())) {
+                    throw new RuntimeException("Erro semântico identificador não encontrado: " + simbolo.getValor());
                 }
+                else{
+                    obtemSimbolo();
+                    if(verificaSimbolo(")")){
+                        obtemSimbolo();
+                    }else{
+                        throw new RuntimeException("Erro semântico esperado ) " + simbolo.getValor());
+                    }
+                }
+            }
+        }
+        if(verificaSimbolo("write")){
+            obtemSimbolo();
+            if(verificaSimbolo("(")){
+                obtemSimbolo();
+                if (!tabelaSimbolo.containsKey(simbolo.getValor())) {
+                    throw new RuntimeException("Erro semântico identificador não encontrado: " + simbolo.getValor());
+                }
+                else{
+                    System.out.println("escreveu >> "+simbolo.getValor());
+                    obtemSimbolo();
+                    if(verificaSimbolo(")")){
+                        obtemSimbolo();
+                    }else{
+                        throw new RuntimeException("Erro semântico esperado ) " + simbolo.getValor());
+                    }
+                }
+            }
+        }
+        if (tabelaSimbolo.containsKey(simbolo.getValor())) {
+            obtemSimbolo();
+            if (simbolo.getTipo() != Token.SIMBOLO){
+                throw new RuntimeException("Erro sintático esperado := encontrado: " + simbolo.getValor());
+            }else{
                 obtemSimbolo();
                 expressao();
             }
-            else if(verificaSimbolo("read"))
-            Read();
-            else if(verificaSimbolo("write")){
-                write();
-            }
-            else{
-                pfalsa();
-                condicional();
-            }
-        }obtemSimbolo();
-        if(verificaSimbolo(".")){
-            System.out.println("fim programa");
         }
-    }
-    
-    private void condicional() {
-        
-       while(!verificaSimbolo("$")){
+        if(verificaSimbolo("if")){
             obtemSimbolo();
-            System.out.println("condicional>> "+simbolo.getValor());
-            expressao();
-        } System.out.println("fim condicional");
-        obtemSimbolo();
-        Comandos();
+            condicao();
+            if(verificaSimbolo("then")){
+                obtemSimbolo();
+                Comandos();
+                pfalsa();
+            }
+        }
+        if(verificaSimbolo("$")){
+            obtemSimbolo();
+        }
+
+
     }
 
-
-    private void pfalsa() {
-        if(verificaSimbolo("else")){
-            System.out.println("condicional falsa");
+    private void Mais_Comandos() {
+        System.out.println("simbolo +comandos>>"+simbolo.getValor());
+        if(verificaSimbolo(";")){
             obtemSimbolo();
             Comandos();
         }
     }
+
 
     private void expressao() {
-        
-        System.out.println("expressão");
-        System.out.println("simbolo dentro de expressão >> "+simbolo.getValor());
-        termo();
-       
-    }
-
-    private void termo() {
-        System.out.println("termo expressão >> "+simbolo.getValor());
-        if (simbolo.getTipo() != Token.INDENTIFICADOR & simbolo.getTipo() != Token.INTEIRO & simbolo.getTipo() != Token.REAL){
-            throw new RuntimeException("variavel esperado int float or identficador encontrado: "+simbolo.getValor());
-        }if((!tabelaSimbolo.containsKey(simbolo.getValor()) & simbolo.getTipo() != Token.INTEIRO & simbolo.getTipo() != Token.REAL)){
-            throw new RuntimeException("variavel: " + simbolo.getValor()+" não declarada");
-          } else {
-            obtemSimbolo();
-            maistermo();
-          }
+        System.out.println("entrada expressão>> "+simbolo.getValor());
+        Termo();
+        Outros_termos();
 
 
     }
-   
-    private void maistermo() {
-        while(!verificaSimbolo(";") && !relacao() && !verificaSimbolo("then")){            
-            System.out.println("operador >> "+simbolo.getValor());
-            if (simbolo.getTipo() != Token.SIMBOLO){
-                throw new RuntimeException("esperado expressão aritmietica antes de : "+simbolo.getValor());
-            
-            }else{
-                obtemSimbolo();
-                termo();
-            }
-        }
-        if(relacao()){
-            //obtemSimbolo();
-            System.out.println("fim expressão volta a condicional");
-            condicional();
-        }
-        System.out.println("fim expressão volta a comandos");
-        obtemSimbolo();
-        Comandos();
 
-    }
-
-    private boolean relacao(){
-        if(verificaSimbolo(">")||verificaSimbolo("<")){
-            return true;
-        }
-        else if(verificaSimbolo(">=")||verificaSimbolo("<=")){
-            return true;
-        }else if(verificaSimbolo("=")||verificaSimbolo("<>")){
-            return true;
-        }else{
-            return false;
-        }
-        
-    }
-
-
-
-    private void Read() {
-        System.out.print("read");
-        if(verificaSimbolo("read")){
-            obtemSimbolo();
-            abreparentesis();
-                        
-        }else{
-            throw new RuntimeException("esperado Read antes de " + simbolo.getValor());
-        }
-
-    }
-    private void write() {
-        System.out.print("write");
-        if(verificaSimbolo("write")){
-            obtemSimbolo();
-            abreparentesis2();
-                        
-        }else{
-            throw new RuntimeException("esperado Read antes de " + simbolo.getValor());
-        }
-
-    }
     
 
-    private void abreparentesis() {
-        System.out.print("(");
+
+
+    private void Termo() {
+        System.out.println("termo >> "+simbolo.getValor());
+        op_un();
+        fator();
+        mais_fatores();
+    }
+
+    private void op_un(){
+        if(verificaSimbolo("-")){
+            System.out.println("op_UN   "+simbolo.getValor());
+            obtemSimbolo();
+        }
+        
+    }
+    private void op_mul(){
+        if(verificaSimbolo("*")||verificaSimbolo("/")){
+            System.out.println("op_MUl "+simbolo.getValor());
+            obtemSimbolo();
+        }
+    }
+
+    private void op_ad(){
+        if(verificaSimbolo("+")){
+            System.out.println("op_AD   "+simbolo.getValor());
+            obtemSimbolo();
+        }
+
+    }
+
+    private void fator(){
+        System.out.println("fator "+simbolo.getValor());
+        if(simbolo.getTipo()==Token.INDENTIFICADOR){
+            if (tabelaSimbolo.containsKey(simbolo.getValor())){
+                obtemSimbolo();
+            }else if(!verificaSimbolo("then")){
+                throw new RuntimeException("Erro sintatico não declarado " + simbolo.getValor());
+            }
+        } if(simbolo.getTipo()==Token.REAL){
+            obtemSimbolo();
+        } if(simbolo.getTipo()==Token.INTEIRO){
+            obtemSimbolo();
+        }
         if(verificaSimbolo("(")){
             obtemSimbolo();
-            if (!tabelaSimbolo.containsKey(simbolo.getValor())) {
-                throw new RuntimeException("variavel : " + simbolo.getValor()+" não declarada");
-              } else {
-                System.out.print(simbolo.getValor());
-                obtemSimbolo();
-                fechaparentesis();
-              }
-
+            expressao();
         }
-    }
-
-
-
-    private void fechaparentesis() {
-        System.out.print(");\n");
         if(verificaSimbolo(")")){
-            obtemSimbolo();
-            if (!verificaSimbolo(";")) {
-                throw new RuntimeException("esperado ; encontrado: " + simbolo.getValor());
-              } else {
-                  obtemSimbolo();
-                  Comandos();
-                }
-
+            obtemSimbolo();            
         }
+        else{
+            System.out.println("saida fator "+simbolo.getValor());
+        }
+        
     }
 
 
-    private void abreparentesis2() {
-        System.out.print("(");
-        if(verificaSimbolo("(")){
-            obtemSimbolo();
-            if (!tabelaSimbolo.containsKey(simbolo.getValor())) {
-                throw new RuntimeException("variavel : " + simbolo.getValor()+" não declarada");
-              } else {
-                System.out.print(simbolo.getValor());
-                obtemSimbolo();
-                fechaparentesis2();
-              }
+    private void mais_fatores(){
+        System.out.println("mais fatores: "+simbolo.getValor());
+        op_mul();
+        fator();
+        //mais_fatores(); não consegui executar com essa recursão ficava um loop infinito
 
-        }
     }
 
-    private void fechaparentesis2() {
-        System.out.print(")\n");
-        if(verificaSimbolo(")")){
+    private void Outros_termos() {
+        System.out.println("outros termos "+simbolo.getValor());
+        op_ad();
+        Termo();
+        //Outros_termos(); não entendi porque a recursão ficava infinita 
+    }
+
+
+
+
+    private void condicao(){
+        System.out.println("entrada condicao  "+simbolo.getValor());
+        expressao();
+        relacao();
+        expressao();
+    }
+ 
+    private void relacao() {
+        System.out.println("relação  "+simbolo.getValor());
+        if(verificaSimbolo("<")||verificaSimbolo(">")||verificaSimbolo("<>")){
+            obtemSimbolo();
+        }else if(verificaSimbolo("=")||verificaSimbolo(">=")||verificaSimbolo("<=")){
+            obtemSimbolo();
+        }else{
+            throw new RuntimeException("Esperado relacional antes de " + simbolo.getValor());
+        }
+
+    }
+
+    private void pfalsa(){
+        System.out.println("pfalsa: "+simbolo.getValor());
+        if(verificaSimbolo("else")){
             obtemSimbolo();
             Comandos();
         }
+ 
     }
-
-
+   
     public void Analisador(){
         obtemSimbolo();
         Prog();
