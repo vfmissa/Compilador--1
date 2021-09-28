@@ -116,7 +116,6 @@ public class Lexico {
           break;
         case 4:
           if(isExpression(c)){
-            estado=4;
             tipo+=c;
           }else{
             Retorno();
